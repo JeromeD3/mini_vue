@@ -1,7 +1,7 @@
 // import { isObject } from 'packages/shared'
 import { isObject } from '@mini_vue/shared'
 import { track, trigger } from './effect'
-import { reactive } from './reactive'
+import { reactive, readonly } from './reactive'
 
 const get = createGetter()
 const set = createSetter()
@@ -20,7 +20,7 @@ function createGetter(isReadonly = false) {
     const res = Reflect.get(target, key)
 
     if (isObject(res)) {
-      return reactive(res)
+      return isReadonly ? readonly(res) : reactive(res)
     }
 
     if (!isReadonly) {
@@ -43,7 +43,7 @@ export const mutableHandlers: ProxyHandler<any> = {
 }
 export const readonlyHandlers: ProxyHandler<any> = {
   get: readonlyGet,
-  set(target, key) {
+  set(_, key) {
     console.warn(`Set operation on key "${String(key)}" failed: target is readonly.`)
     return true
   },

@@ -13,15 +13,15 @@ export function readonly<T extends object>(target: T): T {
   return createActiveObject(target, readonlyHandlers)
 }
 
-function createActiveObject(target, baseHandlers) {
+function createActiveObject(target, baseHandlers){
   return new Proxy(target, baseHandlers)
 }
 
 export function isReactive(value) {
+  // 主要是触发了get操作，如果走到了get操作，说明这个对象是响应式的
   return !!value[reactiveFlags.IS_REACTIVE]
 }
 
 export function isReadonly(value) {
   return !!value[reactiveFlags.IS_READONLY]
 }
-

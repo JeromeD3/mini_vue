@@ -7,6 +7,7 @@ describe('reactive', () => {
     expect(observed).not.toBe(orginal)
     expect(observed.foo).toBe(1)
     expect(isReactive(observed)).toBe(true)
+    // 原始对象不会触发get操作
     expect(isReactive(orginal)).toBe(false)
   })
 

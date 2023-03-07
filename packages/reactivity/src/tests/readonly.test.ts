@@ -6,7 +6,10 @@ describe('readonly', () => {
     const wrapped = readonly(orginal)
     expect(wrapped).not.toBe(orginal)
     expect(isReadonly(wrapped)).toBe(true)
+    expect(isReadonly(wrapped.bar)).toBe(true)
+
     expect(isReadonly(orginal)).toBe(false)
+    expect(isReadonly(orginal.bar)).toBe(false)
 
     expect(wrapped.foo).toBe(1)
   })
