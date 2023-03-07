@@ -68,6 +68,10 @@ export function track(target: any, key: any) {
     depsMap.set(key, (dep = new Set()))
   }
 
+  trackEffects(dep)
+}
+
+export function trackEffects(dep) {
   //  已经在dep中了
   if (dep.has(activeEffect)) return
   dep.add(activeEffect)
