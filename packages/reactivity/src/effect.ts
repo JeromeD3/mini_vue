@@ -15,6 +15,7 @@ class ReactiveEffect {
     // 因为在执行fn的时候，会执行track，track需要用到activeEffect
     // 所以在执行fn之前，先把this 赋值给activeEffect
     if (!this.cleanActive) return this._fn() // 已经清理过了，就不需要再执行了
+    
     // 不需要清理，而是需要执行收集到的依赖
     shouldTrack = true
     activeEffect = this
@@ -78,7 +79,7 @@ export function trackEffects(dep) {
   activeEffect.deps.push(dep)
 }
 
-function isTracking() {
+export function isTracking() {
   return shouldTrack && activeEffect !== undefined
 }
 
