@@ -1,23 +1,29 @@
-// import { isObject } from 'packages/shared'
 import { isObject } from '@mini_vue/shared'
 import { track, trigger } from './effect'
-import { reactive, readonly } from './reactive'
+import { reactive, reactiveFlags, readonly } from './reactive'
+import { extend } from '../../shared/index'
 
 const get = createGetter()
 const set = createSetter()
 const readonlyGet = createGetter(true)
-function createGetter(isReadonly = false) {
+const shallowReadonlyGet = createGetter(true, true)
+
+function createGetter(isReadonly = false, shallow = false) {
   return function get(target, key) {
     // target :{age: 10}
     // key:age
     // value: 10
-    if (key === '__v_isReactive') {
+    if (key === reactiveFlags.IS_REACTIVE) {
       return !isReadonly
-    } else if (key === '__v_isReadonly') {
+    } else if (key === reactiveFlags.IS_READONLY) {
       return isReadonly
     }
 
     const res = Reflect.get(target, key)
+
+    if (shallow) {
+      return res
+    }
 
     if (isObject(res)) {
       return isReadonly ? readonly(res) : reactive(res)
@@ -37,10 +43,12 @@ function createSetter() {
     return res
   }
 }
+
 export const mutableHandlers: ProxyHandler<any> = {
   get,
   set,
 }
+
 export const readonlyHandlers: ProxyHandler<any> = {
   get: readonlyGet,
   set(_, key) {
@@ -48,3 +56,7 @@ export const readonlyHandlers: ProxyHandler<any> = {
     return true
   },
 }
+
+export const shallowReadonlyHandlers: ProxyHandler<any> = extend({}, readonlyHandlers, {
+  get: shallowReadonlyGet,
+})

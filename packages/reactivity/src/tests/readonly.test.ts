@@ -10,7 +10,7 @@ describe('readonly', () => {
 
     expect(isReadonly(orginal)).toBe(false)
     expect(isReadonly(orginal.bar)).toBe(false)
-
+    wrapped.foo = 2
     expect(wrapped.foo).toBe(1)
   })
 
