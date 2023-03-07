@@ -1,4 +1,4 @@
-import { isReactive, reactive } from '../reactive'
+import { isProxy, isReactive, reactive } from '../reactive'
 
 describe('reactive', () => {
   it('happy path', () => {
@@ -9,6 +9,7 @@ describe('reactive', () => {
     expect(isReactive(observed)).toBe(true)
     // 原始对象不会触发get操作
     expect(isReactive(orginal)).toBe(false)
+    expect(isProxy(observed)).toBe(true)
   })
 
   test('nested reactives', () => {

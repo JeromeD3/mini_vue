@@ -25,6 +25,8 @@ function createGetter(isReadonly = false, shallow = false) {
       return res
     }
 
+    // 通过递🐢实现深层次的响应式，否则为shallow
+    // so，在isProxy中，不用特意去判断是否为shallow
     if (isObject(res)) {
       return isReadonly ? readonly(res) : reactive(res)
     }
