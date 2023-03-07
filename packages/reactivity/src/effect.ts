@@ -1,5 +1,4 @@
-import { extend } from '../../shared'
-
+import { extend } from '@mini_vue/shared'
 let activeEffect: any
 let shouldTrack = false
 
@@ -62,7 +61,7 @@ export function track(target: any, key: any) {
 
   if (!depsMap) {
     targetMap.set(target, (depsMap = new Map()))
-  } 
+  }
 
   let dep = depsMap.get(key)
   if (!dep) {
