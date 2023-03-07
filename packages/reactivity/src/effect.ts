@@ -89,6 +89,10 @@ export function trigger(target: any, key: any) {
   const depsMap = targetMap.get(target)
   const dep = depsMap.get(key)
 
+  triggerEffects(dep)
+}
+
+export function triggerEffects(dep) {
   for (const effect of dep) {
     if (effect.scheduler) {
       effect.scheduler()
