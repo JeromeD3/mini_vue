@@ -1,5 +1,6 @@
 import { effect } from '../effect'
-import { ref } from '../ref'
+import { isRef, ref, unRef } from '../ref'
+import { reactive } from '../reactive'
 
 describe('ref', () => {
   it("should return a ref's value", () => {
@@ -21,7 +22,7 @@ describe('ref', () => {
     expect(calls).toBe(2)
     expect(dummy).toBe(2)
     // same value should not trigger
-    a.value = 2 
+    a.value = 2
     expect(calls).toBe(2)
     expect(dummy).toBe(2)
   })
@@ -39,25 +40,25 @@ describe('ref', () => {
     expect(dummy).toBe(2)
   })
 
-  it.skip('proxyRefs', () => {
-    const user = {
-      age: ref(10),
-      name: 'xiaohong',
-    }
-    const proxyUser = proxyRefs(user)
-    expect(user.age.value).toBe(10)
-    expect(proxyUser.age).toBe(10)
-    expect(proxyUser.name).toBe('xiaohong')
-    ;(proxyUser as any).age = 20
-    expect(proxyUser.age).toBe(20)
-    expect(user.age.value).toBe(20)
+  // it('proxyRefs', () => {
+  //   const user = {
+  //     age: ref(10),
+  //     name: 'xiaohong',
+  //   }
+  //   const proxyUser = proxyRefs(user)
+  //   expect(user.age.value).toBe(10)
+  //   expect(proxyUser.age).toBe(10)
+  //   expect(proxyUser.name).toBe('xiaohong')
+  //   ;(proxyUser as any).age = 20
+  //   expect(proxyUser.age).toBe(20)
+  //   expect(user.age.value).toBe(20)
 
-    proxyUser.age = ref(10)
-    expect(proxyUser.age).toBe(10)
-    expect(user.age.value).toBe(10)
-  })
+  //   proxyUser.age = ref(10)
+  //   expect(proxyUser.age).toBe(10)
+  //   expect(user.age.value).toBe(10)
+  // })
 
-  it.skip('isRef', () => {
+  it('isRef', () => {
     const a = ref(1)
     const user = reactive({
       age: 1,
@@ -67,7 +68,7 @@ describe('ref', () => {
     expect(isRef(user)).toBe(false)
   })
 
-  it.skip('unRef', () => {
+  it('unRef', () => {
     const a = ref(1)
     expect(unRef(a)).toBe(1)
     expect(unRef(1)).toBe(1)

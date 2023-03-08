@@ -14,7 +14,8 @@ class RefImpl {
   private _rawValue: any
   // 将effect收集到的依赖存起来
   public dep: Set<unknown>
-
+  // 用于判断是否是ref
+  public __v_isRef = true
   constructor(value) {
     // 保存原始值，后续get操作会将value转成响应式对象，
     // 所以要保存原始值用于set操作中的hasChanged的对比
@@ -60,4 +61,15 @@ function trackRefValue(ref) {
 
 export function ref(value) {
   return new RefImpl(value)
+}
+
+export function isRef(ref){
+  // 通过判断是否有__v_isRef属性来判断是否是ref
+  return !!ref.__v_isRef
+}
+
+export function unRef(ref) {
+  // 如果是ref对象 -> ref.value
+  // reactive -> reactive
+  return isRef(ref) ? ref.value : ref
 }
