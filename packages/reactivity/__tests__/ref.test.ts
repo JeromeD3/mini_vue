@@ -1,6 +1,6 @@
-import { effect } from '../effect'
-import { isRef, proxyRefs, ref, unRef } from '../ref'
-import { reactive } from '../reactive'
+import { effect } from '../src/effect'
+import { isRef, proxyRefs, ref, unRef } from '../src/ref'
+import { reactive } from '../src/reactive'
 
 describe('ref', () => {
   it("should return a ref's value", () => {
