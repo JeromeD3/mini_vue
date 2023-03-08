@@ -1,7 +1,6 @@
-import { isObject } from '@mini_vue/shared'
+import { extend, isObject } from '@mini_vue/shared'
 import { track, trigger } from './effect'
 import { reactive, reactiveFlags, readonly } from './reactive'
-import { extend } from '../../shared/index'
 
 const get = createGetter()
 const set = createSetter()
