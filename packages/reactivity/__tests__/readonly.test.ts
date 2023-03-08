@@ -5,7 +5,7 @@ describe('readonly', () => {
     const orginal = { foo: 1, bar: { baz: 2 } }
     const wrapped = readonly(orginal)
     expect(wrapped).not.toBe(orginal)
-    
+
     expect(isReadonly(wrapped)).toBe(true)
     expect(isReadonly(wrapped.bar)).toBe(true)
 
@@ -20,7 +20,7 @@ describe('readonly', () => {
   it('warn then call set', () => {
     console.warn = vi.fn()
     const user = readonly({
-      age: 10,
+      age: 10
     })
     user.age = 20
     expect(console.warn).toBeCalled()

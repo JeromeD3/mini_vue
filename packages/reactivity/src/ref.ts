@@ -91,6 +91,6 @@ export function proxyRefs<T extends object>(objectWithRefs: T) {
       } else {
         return Reflect.set(target, key, value)
       }
-    },
+    }
   })
 }

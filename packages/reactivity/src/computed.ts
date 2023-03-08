@@ -11,7 +11,6 @@ import { ReactiveEffect } from './effect'
  * 7. 当后续用户调用获取数据的时候，就会调用get方法，此时调用effect，重新计算
  */
 
-
 class ComputedRefImpl {
   private _getter: any
   private _dirty: boolean = true // 防止重复计算

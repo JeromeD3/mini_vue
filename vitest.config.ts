@@ -3,14 +3,14 @@ import path from 'path'
 
 export default defineConfig({
   test: {
-    globals: true,
+    globals: true
   },
   resolve: {
     alias: [
       {
         find: /@mini_vue\/([\w-]*)/,
-        replacement: path.resolve(__dirname, "packages") + "/$1/src",
-      },
-    ],
-  },
+        replacement: path.resolve(__dirname, 'packages') + '/$1/src'
+      }
+    ]
+  }
 })

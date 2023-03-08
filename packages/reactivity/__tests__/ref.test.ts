@@ -29,7 +29,7 @@ describe('ref', () => {
 
   it('should make nested properties reactive', () => {
     const a = ref({
-      count: 1,
+      count: 1
     })
     let dummy
     effect(() => {
@@ -44,7 +44,7 @@ describe('ref', () => {
     // 主要用于template
     const user = {
       age: ref(10),
-      name: 'xiaohong',
+      name: 'xiaohong'
     }
     // get -> age (ref) 如果是ref类型的话，就返回.value
     // not ref -> value
@@ -65,7 +65,7 @@ describe('ref', () => {
   it('isRef', () => {
     const a = ref(1)
     const user = reactive({
-      age: 1,
+      age: 1
     })
     expect(isRef(a)).toBe(true)
     expect(isRef(1)).toBe(false)

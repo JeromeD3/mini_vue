@@ -8,7 +8,7 @@ describe('effect', () => {
      *
      */
     const user = reactive({
-      age: 10,
+      age: 10
     })
     let nextAge
     // 当这里触发get操作的时候，会将effect中的fn存储到targetMap中
@@ -108,7 +108,7 @@ describe('effect', () => {
   it('onStop', () => {
     const onStop = vi.fn()
     const runner = effect(() => {}, {
-      onStop,
+      onStop
     })
 
     stop(runner)

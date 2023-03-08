@@ -13,7 +13,7 @@ describe('reactivity/shallowReadonly', () => {
   it('warn then call set', () => {
     console.warn = vi.fn()
     const user = shallowReadonly({
-      age: 10,
+      age: 10
     })
     user.age = 20
     expect(console.warn).toBeCalled()

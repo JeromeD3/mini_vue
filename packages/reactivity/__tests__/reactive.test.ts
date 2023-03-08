@@ -16,9 +16,9 @@ describe('reactive', () => {
     // 嵌套的对象，也会被转换成响应式
     const original = {
       nested: {
-        foo: 1,
+        foo: 1
       },
-      array: [{ bar: 2 }],
+      array: [{ bar: 2 }]
     }
     const observed = reactive(original)
     expect(isReactive(observed.nested)).toBe(true)
