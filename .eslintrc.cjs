@@ -29,14 +29,11 @@ module.exports = {
     ]
   },
   overrides: [
-    // tests, no restrictions (runs in Node / jest with jsdom)
     {
       files: ['**/__tests__/**', 'packages/dts-test/**'],
       rules: {
         'no-restricted-globals': 'off',
-        'no-restricted-syntax': 'off',
-        'jest/no-disabled-tests': 'error',
-        'jest/no-focused-tests': 'error'
+        'no-restricted-syntax': 'off'
       }
     },
     // shared, may be used in any env
@@ -76,6 +73,7 @@ module.exports = {
       files: [
         'scripts/**',
         './*.js',
+        './*.cjs',
         'packages/**/index.js',
         'packages/size-check/**'
       ],

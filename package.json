@@ -1,7 +1,7 @@
 {
   "name": "mini_vue",
   "version": "1.0.0",
-  "description": "",
+  "description": "Help you learn more efficiently vue3 source code",
   "type": "module",
   "scripts": {
     "test": "vitest",
