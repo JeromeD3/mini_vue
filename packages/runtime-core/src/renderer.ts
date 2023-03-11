@@ -13,6 +13,7 @@ function patch(vnode, container) {
   // 去处理组件
 
   // 判断 是不是element类型
+  // processElement(vnode, container) 
   processComponent(vnode, container)
 }
 
