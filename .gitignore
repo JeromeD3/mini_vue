@@ -10,3 +10,5 @@ TODOs.md
 .eslintcache
 dts-build/packages
 *.tsbuildinfo
+lib
+example
