@@ -17,12 +17,6 @@ function patch(vnode, container) {
   }
 }
 
-function processComponent(vnode, container) {
-  console.log('processComponent执行了，vnode---->', vnode)
-
-  mountComponent(vnode, container)
-}
-
 function processElement(vnode, container) {
   console.log('processElement执行了，vnode---->', vnode)
   // init -> update
@@ -30,7 +24,8 @@ function processElement(vnode, container) {
 }
 
 function mountElement(vnode: any, container: any) {
-  const el = document.createElement(vnode.type)
+  const el = (vnode.el = document.createElement(vnode.type))
+
   // console.log(vnode)
   // console.log(container)
   // 处理children
@@ -43,7 +38,6 @@ function mountElement(vnode: any, container: any) {
   if (typeof children === 'string') {
     el.textContent = children
   } else if (Array.isArray(children)) {
-    // console.log(children)
     mountChildren(children, el)
   }
 
@@ -65,19 +59,26 @@ function mountChildren(children, container) {
   })
 }
 
-function mountComponent(vnode, container) {
-  const instance = createComponentInstance(vnode)
+function processComponent(initialVNode, container) {
+  console.log('processComponent执行了，vnode---->', initialVNode)
+
+  mountComponent(initialVNode, container)
+}
+
+function mountComponent(initialVNode, container) {
+  const instance = createComponentInstance(initialVNode)
   // 初始化组件 调用setup函数，如果有就执行
   setupComponent(instance)
   // 渲染-> 调用render函数
-  setupRenderEffect(instance, container)
+  setupRenderEffect(instance, initialVNode, container)
 }
-function setupRenderEffect(instance: any, container: any) {
+function setupRenderEffect(instance: any, initialVNode: any, container: any) {
   const { proxy } = instance
-  console.log(instance)
   const subTree = instance.render.call(proxy)
-  console.log(subTree)
   // vnode -> patch
   // vnode -> element -> mountElement
   patch(subTree, container)
+
+  // 所有的element都已经mount之后
+  initialVNode.el = subTree.el
 }

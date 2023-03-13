@@ -1,3 +1,4 @@
+import { PublicInstanceProxyHandlers } from '../../reactivity/src/componentPublicInstance'
 export function createComponentInstance(vnode) {
   const component = {
     vnode,
@@ -17,18 +18,7 @@ export function setupComponent(instance) {
 function setupStatefulComponent(instance: any) {
   const Component = instance.vnode.type
 
-  instance.proxy = new Proxy(
-    {},
-    {
-      get(target, key) {
-        const { setupState } = instance
-        // 用object.has key 试一下
-        if (key in setupState) {
-          return setupState[key]
-        }
-      }
-    }
-  )
+  instance.proxy = new Proxy({ _: instance }, PublicInstanceProxyHandlers)
   const { setup } = Component
 
   if (setup) {
