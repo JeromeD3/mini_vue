@@ -1,8 +1,16 @@
 import { PublicInstanceProxyHandlers } from '../../reactivity/src/componentPublicInstance'
+
+/**
+ *
+ * @param vnode
+ * @returns component
+ */
 export function createComponentInstance(vnode) {
   const component = {
     vnode,
     type: vnode.type,
+    // Used to store the data returned by the setup function
+    // Conveniently access the return value of setup in the render function useing 'this'
     setupState: {}
   }
   return component
