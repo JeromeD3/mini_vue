@@ -1,5 +1,5 @@
+import { ShapeFlags } from '../../shared/src/ShapeFlags'
 import { createComponentInstance, setupComponent } from './component'
-import { isObject } from '../../shared/src/index'
 
 export function render(vnode, container) {
   // patch
@@ -10,9 +10,12 @@ function patch(vnode, container) {
   // 1. 判断新旧vnode是否是同一个对象
   // 2. 如果是同一个对象，那么就是更新操作
   // 3. 如果不是同一个对象，那么就是替换操作
-  if (typeof vnode.type === 'string') {
+
+  // ShapeFlags -> 标识 vnode 有哪几种 flag
+  const { shapeFlags } = vnode
+  if (shapeFlags & ShapeFlags.ELEMENT) {
     processElement(vnode, container)
-  } else if (isObject(vnode.type)) {
+  } else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
     processComponent(vnode, container)
   }
 }
@@ -29,15 +32,15 @@ function mountElement(vnode: any, container: any) {
   // console.log(vnode)
   // console.log(container)
   // 处理children
-  const { children } = vnode
+  const { children, shapeFlags } = vnode
 
   /**
    * 1. 如果是字符串，那么就是文本节点
    * 2. 如果是数组，那么就是多个子节点,递归调用patch
    */
-  if (typeof children === 'string') {
+  if (shapeFlags & ShapeFlags.TEXT_CHILDREN) {
     el.textContent = children
-  } else if (Array.isArray(children)) {
+  } else if (shapeFlags & ShapeFlags.ARRAY_CHILDREN) {
     mountChildren(children, el)
   }
 

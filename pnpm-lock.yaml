@@ -28,6 +28,12 @@ importers:
     dependencies:
       '@mini_vue/shared': link:../shared
 
+  packages/runtime-core:
+    specifiers:
+      '@mini_vue/shared': workspace:^1.0.0
+    dependencies:
+      '@mini_vue/shared': link:../shared
+
   packages/shared:
     specifiers: {}
 
