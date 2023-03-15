@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@jerome778/reactivity": "workspace:^1.0.0",
-    "@jerome778/shared": "workspace:^1.0.0"
+    "@jerome778/reactivity": "workspace:^1.0.1",
+    "@jerome778/shared": "workspace:^1.0.1"
   }
 }
