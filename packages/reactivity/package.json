@@ -1,5 +1,5 @@
 {
-  "name": "@mini_vue/reactivity",
+  "name": "@jerome778/reactivity",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@mini_vue/shared": "workspace:^1.0.0"
+    "@jerome778/shared": "workspace:^1.0.0"
   }
 }

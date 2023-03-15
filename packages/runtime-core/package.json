@@ -1,5 +1,5 @@
 {
-  "name": "@mini_vue/runtime-core",
+  "name": "@jerome778/runtime-core",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@mini_vue/shared": "workspace:^1.0.0"
+    "@jerome778/reactivity": "workspace:^1.0.0",
+    "@jerome778/shared": "workspace:^1.0.0"
   }
 }
