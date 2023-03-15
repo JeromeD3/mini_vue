@@ -15,7 +15,6 @@ export function createVNode(type, props?, children?) {
     el: null
   }
 
-  debugger
   // console.log(vnode)
   // chilren
   if (typeof children === 'string') {

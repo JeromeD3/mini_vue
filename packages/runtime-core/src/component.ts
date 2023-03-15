@@ -1,4 +1,6 @@
 import { PublicInstanceProxyHandlers } from '../../reactivity/src/componentPublicInstance'
+import { initProps } from './componentProps'
+import { shallowReadonly } from '../../reactivity/src/reactive'
 
 /**
  *
@@ -17,9 +19,8 @@ export function createComponentInstance(vnode) {
 }
 
 export function setupComponent(instance) {
-  // initProps()
+  initProps(instance, instance.vnode.props)
   // initSlots()
-
   setupStatefulComponent(instance)
 }
 
@@ -31,7 +32,8 @@ function setupStatefulComponent(instance: any) {
 
   if (setup) {
     // function object
-    const setupResult = setup()
+    // setup里面的props是浅层的
+    const setupResult = setup(shallowReadonly(instance.props))
     handleSetupResult(instance, setupResult)
   }
 }
