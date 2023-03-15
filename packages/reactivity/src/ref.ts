@@ -1,4 +1,4 @@
-import { hasChanged, isObject } from '@mini_vue/shared'
+import { hasChanged, isObject } from '@jerome778/shared'
 import { isTracking, trackEffects, triggerEffects } from './effect'
 import { reactive } from './reactive'
 

@@ -1,4 +1,6 @@
-import { extend } from '@mini_vue/shared'
+// import { extend } from "@jerome778/shared"
+import { extend } from '../../shared/src/index'
+
 let activeEffect: any
 let shouldTrack = false
 
