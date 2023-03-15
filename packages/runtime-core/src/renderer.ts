@@ -21,7 +21,7 @@ function patch(vnode, container) {
 }
 
 function processElement(vnode, container) {
-  console.log('processElement执行了，vnode---->', vnode)
+  // console.log('processElement执行了，vnode---->', vnode)
   // init -> update
   mountElement(vnode, container)
 }
@@ -70,7 +70,7 @@ function mountChildren(children, container) {
 }
 
 function processComponent(initialVNode, container) {
-  console.log('processComponent执行了，vnode---->', initialVNode)
+  // console.log('processComponent执行了，vnode---->', initialVNode)
 
   mountComponent(initialVNode, container)
 }

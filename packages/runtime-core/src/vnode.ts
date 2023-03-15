@@ -16,7 +16,7 @@ export function createVNode(type, props?, children?) {
   }
 
   debugger
-  console.log(vnode)
+  // console.log(vnode)
   // chilren
   if (typeof children === 'string') {
     vnode.shapeFlags |= ShapeFlags.TEXT_CHILDREN
