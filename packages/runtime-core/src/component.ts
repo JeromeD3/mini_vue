@@ -1,6 +1,7 @@
 import { PublicInstanceProxyHandlers } from '../../reactivity/src/componentPublicInstance'
 import { initProps } from './componentProps'
 import { shallowReadonly } from '../../reactivity/src/reactive'
+import { emit } from './componentEmit'
 
 /**
  *
@@ -13,8 +14,11 @@ export function createComponentInstance(vnode) {
     type: vnode.type,
     // Used to store the data returned by the setup function
     // Conveniently access the return value of setup in the render function useing 'this'
-    setupState: {}
+    setupState: {},
+    props: {},
+    emit: () => {}
   }
+  component.emit = emit.bind(null, component) as any
   return component
 }
 
@@ -33,7 +37,9 @@ function setupStatefulComponent(instance: any) {
   if (setup) {
     // function object
     // setup里面的props是浅层的
-    const setupResult = setup(shallowReadonly(instance.props))
+    const setupResult = setup(shallowReadonly(instance.props), {
+      emit: instance.emit
+    })
     handleSetupResult(instance, setupResult)
   }
 }
