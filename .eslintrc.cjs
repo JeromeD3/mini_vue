@@ -43,6 +43,12 @@ module.exports = {
         'no-restricted-globals': 'off'
       }
     },
+    {
+      files: ['packages/runtime-core/**'],
+      rules: {
+        'no-restricted-globals': off
+      }
+    },
     // Packages targeting DOM
     {
       files: ['packages/{vue,vue-compat,runtime-dom}/**'],
