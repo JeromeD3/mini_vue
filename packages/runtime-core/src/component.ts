@@ -2,6 +2,7 @@ import { PublicInstanceProxyHandlers } from '../../reactivity/src/componentPubli
 import { initProps } from './componentProps'
 import { shallowReadonly } from '../../reactivity/src/reactive'
 import { emit } from './componentEmit'
+import { initSlots } from './componentSlots'
 
 /**
  *
@@ -16,6 +17,7 @@ export function createComponentInstance(vnode) {
     // Conveniently access the return value of setup in the render function useing 'this'
     setupState: {},
     props: {},
+    slots: {},
     emit: () => {}
   }
   component.emit = emit.bind(null, component) as any
@@ -24,7 +26,7 @@ export function createComponentInstance(vnode) {
 
 export function setupComponent(instance) {
   initProps(instance, instance.vnode.props)
-  // initSlots()
+  initSlots(instance, instance.vnode.children)
   setupStatefulComponent(instance)
 }
 
