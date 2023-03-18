@@ -10,7 +10,7 @@ export const hasChanged = (value, newValue) => {
 export const hasOwn = (val, key) =>
   Object.prototype.hasOwnProperty.call(val, key)
 
-// 驼峰化 例如：on-click => onClick  斜杠变大写
+// 驼峰化 例如：on-click => onClick  横杠变大写
 export const camelize = (str: string) => {
   return str.replace(/-(\w)/g, (_, c: string) => (c ? c.toUpperCase() : ''))
 }
