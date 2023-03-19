@@ -1,5 +1,6 @@
 import { ShapeFlags } from '../../shared/src/ShapeFlags'
 import { createComponentInstance, setupComponent } from './component'
+import { Fragment, Text } from './vnode'
 
 export function render(vnode, container) {
   // patch
@@ -12,16 +13,39 @@ function patch(vnode, container) {
   // 3. 如果不是同一个对象，那么就是替换操作
 
   // ShapeFlags -> 标识 vnode 有哪几种 flag
-  const { shapeFlags } = vnode
-  if (shapeFlags & ShapeFlags.ELEMENT) {
-    processElement(vnode, container)
-  } else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
-    processComponent(vnode, container)
+  const { shapeFlags, type } = vnode
+
+  //Fragement -> 只渲染children
+
+  switch (type) {
+    case Fragment:
+      processFragment(vnode, container)
+      break
+    case Text:
+      processText(vnode, container)
+      break
+    default:
+      if (shapeFlags & ShapeFlags.ELEMENT) {
+        processElement(vnode, container)
+      } else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
+        processComponent(vnode, container)
+      }
+      break
   }
 }
 
+function processText(vnode, container) {
+  // Text类型的vnode，children就是文本内容，跳过渲染mountElement，直接渲染文本节点
+  const { children } = vnode
+  const textNode = (vnode.el = document.createTextNode(children))
+  container.append(textNode)
+}
+
+function processFragment(vnode, container) {
+  mountChildren(vnode.children, container)
+}
+
 function processElement(vnode, container) {
-  // console.log('processElement执行了，vnode---->', vnode)
   // init -> update
   mountElement(vnode, container)
 }
@@ -29,8 +53,6 @@ function processElement(vnode, container) {
 function mountElement(vnode: any, container: any) {
   const el = (vnode.el = document.createElement(vnode.type))
 
-  // console.log(vnode)
-  // console.log(container)
   // 处理children
   const { children, shapeFlags } = vnode
 
@@ -47,7 +69,6 @@ function mountElement(vnode: any, container: any) {
   // props
   const { props } = vnode
   for (const key in props) {
-    // console.log(key)
     // 不会遍历原型链上的属性
     if (Object.prototype.hasOwnProperty.call(props, key)) {
       const value = props[key]
@@ -70,8 +91,6 @@ function mountChildren(children, container) {
 }
 
 function processComponent(initialVNode, container) {
-  // console.log('processComponent执行了，vnode---->', initialVNode)
-
   mountComponent(initialVNode, container)
 }
 
@@ -82,6 +101,7 @@ function mountComponent(initialVNode, container) {
   // 渲染-> 调用render函数
   setupRenderEffect(instance, initialVNode, container)
 }
+
 function setupRenderEffect(instance: any, initialVNode: any, container: any) {
   const { proxy } = instance
   const subTree = instance.render.call(proxy)

@@ -37,6 +37,5 @@ function normalizeObjectSlots(children: any, slots: any) {
  * @return 【vnode】
  */
 function normalizeSlotValue(value) {
-  // console.log('value', value)
   return Array.isArray(value) ? value : [value]
 }
