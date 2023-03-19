@@ -9,7 +9,7 @@ import { initSlots } from './componentSlots'
  * @param vnode
  * @returns component
  */
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode, parent) {
   const component = {
     vnode,
     type: vnode.type,
@@ -18,6 +18,8 @@ export function createComponentInstance(vnode) {
     setupState: {},
     props: {},
     slots: {},
+    provides: parent ? parent.provides : {},
+    parent,
     emit: () => {}
   }
   component.emit = emit.bind(null, component) as any
