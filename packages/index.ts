@@ -1,1 +1,1 @@
-export * from './runtime-core/src'
+export * from './runtime-dom/src'
