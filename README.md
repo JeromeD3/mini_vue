@@ -14,3 +14,8 @@ Help you learn more efficiently vue3 source code
 - isRef
 - unRef
 - proxyRefs
+- computed
+- provide
+- inject
+- runtime-core
+- runtime-dom
