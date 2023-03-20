@@ -3,9 +3,18 @@ import { createComponentInstance, setupComponent } from './component'
 import { createAppAPI } from './createApp'
 import { Fragment, Text } from './vnode'
 import { effect } from '../../reactivity/src/effect'
+import { EMPTY_OBJ } from '../../shared/src/'
 
 export function createRenderer(options) {
-  const { createElement, patchProp, insert } = options
+  const {
+    createElement: hostCreateElement,
+    // setElementText: hostSetElementText,
+    patchProp: hostPatchProp,
+    insert: hostInsert
+    // remove: hostRemove,
+    // setText: hostSetText,
+    // createText: hostCreateText,
+  } = options
 
   function render(vnode, container) {
     // 这里只会执行一次，因为是根节点，所以没有父节点，so，下面的父节点给了null
@@ -57,18 +66,51 @@ export function createRenderer(options) {
     if (!n1) {
       // init
       mountElement(n2, container, parentComponent)
-    }else{
+    } else {
       // update
       patchElement(n1, n2, container)
     }
   }
 
   function patchElement(n1, n2, container) {
-    
+    const oldProps = n1.props || EMPTY_OBJ
+    const newProps = n2.props || EMPTY_OBJ
+    // 为什么n2这里需要赋值？ 因为一开始的时候，n2为新节点，在mountElement节点保存了el
+    // 但是如果需要更新的话，n2又是一个新节点，然而却没有保存el，所以需要赋值
+    const el = (n2.el = n1.el)
+    // 为什么这里的el是n1（旧节点的el）
+    // 因为n1是旧节点，旧节点的el是已经渲染好的，涉及到更新的话，就是更新旧节点就行
+    patchProps(el, oldProps, newProps)
   }
-  
+
+  function patchProps(el, oldProps, newProps) {
+    // 三种情况
+    // 1. 旧值和新值不一样 -> update
+    // 2. null || undefined -> del
+    // 3. 新值有，旧值没有 -> del 旧的
+    if (oldProps !== newProps) {
+      for (const key in newProps) {
+        const prevProp = oldProps[key]
+        const nextProp = newProps[key]
+
+        if (prevProp !== nextProp) {
+          hostPatchProp(el, key, prevProp, nextProp)
+        }
+      }
+
+      // 删除某个属性，前面的也要判断
+      if (oldProps !== EMPTY_OBJ) {
+        for (const key in oldProps) {
+          if (!(key in newProps)) {
+            hostPatchProp(el, key, oldProps[key], null)
+          }
+        }
+      }
+    }
+  }
+
   function mountElement(vnode: any, container: any, parentComponent) {
-    const el = (vnode.el = createElement(vnode.type))
+    const el = (vnode.el = hostCreateElement(vnode.type))
 
     // 处理children
     const { children, shapeFlags } = vnode
@@ -89,11 +131,11 @@ export function createRenderer(options) {
       // 不会遍历原型链上的属性
       if (Object.prototype.hasOwnProperty.call(props, key)) {
         const value = props[key]
-        patchProp(el, key, value)
+        hostPatchProp(el, key, null, value)
       }
     }
 
-    insert(el, container)
+    hostInsert(el, container)
   }
 
   function mountChildren(children, container, parentComponent) {
@@ -120,11 +162,12 @@ export function createRenderer(options) {
     // 为什么这里的effect会被执行?
     effect(() => {
       if (!instance.isMounted) {
-        console.log('init')
         const { proxy } = instance
+        // 在初始化的时候存了旧节点
         const subTree = (instance.subTree = instance.render.call(proxy))
         // vnode -> patch
         // vnode -> element -> mountElement
+        // 初始化没有旧节点，所以传入null
         patch(null, subTree, container, instance)
         // 所有的element都已经mount之后
         initialVNode.el = subTree.el
@@ -134,8 +177,8 @@ export function createRenderer(options) {
         const { proxy } = instance
         const subTree = instance.render.call(proxy)
         const prevTree = instance.subTree
+        // 继续把当前节点赋值为旧节点，这样下次更新的时候，就可以拿到旧节点了
         instance.subTree = subTree
-        console.log('update')
 
         patch(prevTree, subTree, container, instance)
       }
