@@ -1,4 +1,5 @@
 import { createRenderer } from '../../runtime-core/src'
+
 function createElement(type) {
   return document.createElement(type)
 }
@@ -22,10 +23,26 @@ function insert(el, parent) {
   parent.appendChild(el)
 }
 
+function remove(child) {
+  const parent = child.parent
+  if (parent) parent.removeChild(child)
+}
+
+function setElementText(el, text) {
+  el.textContent = text
+}
+
+// function setText(el, text) {
+  
+// }
+
 const render: any = createRenderer({
   createElement,
   patchProp,
-  insert
+  insert,
+  remove,
+  setElementText,
+  // setText
 })
 
 export function createApp(...args) {

@@ -8,12 +8,12 @@ import { EMPTY_OBJ } from '../../shared/src/'
 export function createRenderer(options) {
   const {
     createElement: hostCreateElement,
-    // setElementText: hostSetElementText,
+    setElementText: hostSetElementText,
     patchProp: hostPatchProp,
-    insert: hostInsert
-    // remove: hostRemove,
+    insert: hostInsert,
+    remove: hostRemove,
     // setText: hostSetText,
-    // createText: hostCreateText,
+    // createText: hostCreateText
   } = options
 
   function render(vnode, container) {
@@ -68,11 +68,11 @@ export function createRenderer(options) {
       mountElement(n2, container, parentComponent)
     } else {
       // update
-      patchElement(n1, n2, container)
+      patchElement(n1, n2, container, parentComponent)
     }
   }
 
-  function patchElement(n1, n2, container) {
+  function patchElement(n1, n2, container, parentComponent) {
     const oldProps = n1.props || EMPTY_OBJ
     const newProps = n2.props || EMPTY_OBJ
     // 为什么n2这里需要赋值？ 因为一开始的时候，n2为新节点，在mountElement节点保存了el
@@ -81,6 +81,7 @@ export function createRenderer(options) {
     // 为什么这里的el是n1（旧节点的el）
     // 因为n1是旧节点，旧节点的el是已经渲染好的，涉及到更新的话，就是更新旧节点就行
     patchProps(el, oldProps, newProps)
+    patchChildren(n1, n2, el, parentComponent)
   }
 
   function patchProps(el, oldProps, newProps) {
@@ -107,6 +108,42 @@ export function createRenderer(options) {
         }
       }
     }
+  }
+
+  function patchChildren(n1, n2, container, parentComponent) {
+    // 这里el是旧节点的el
+    const prevShapeFlag = n1.shapeFlags
+    const nextshapeFlags = n2.shapeFlags
+    const c1 = n1.children
+    const c2 = n2.children
+
+    // 之前是数组，现在是数组or文本
+    if (nextshapeFlags & ShapeFlags.TEXT_CHILDREN) {
+      // 之前是数组，现在是文本
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        // 1.把老的数组的children全部删除
+        unmountChildren(n1.children)
+      }
+
+      // 之前是文本，现在是文本
+      if (c1 !== c2) {
+        // 2. 设置新的文本
+        hostSetElementText(container, c2)
+      }
+    } else {
+      // 之前是文本，现在是数组or文本
+      if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+        // 1. 清空文本
+        hostSetElementText(container, '')
+        mountChildren(c2, container, parentComponent)
+      }
+    }
+  }
+
+  function unmountChildren(children) {
+    children.forEach(child => {
+      hostRemove(child.el)
+    })
   }
 
   function mountElement(vnode: any, container: any, parentComponent) {
@@ -184,6 +221,7 @@ export function createRenderer(options) {
       }
     })
   }
+
   return {
     createApp: createAppAPI(render)
   }
