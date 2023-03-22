@@ -19,12 +19,13 @@ function patchProp(el, key, preVal, nextVal) {
   }
 }
 
-function insert(el, parent) {
-  parent.appendChild(el)
+function insert(child, parent, anchor) {
+  // anchor 指定插入位置,如果没有，默认插入到最后
+  parent.insertBefore(child, anchor || null)
 }
 
 function remove(child) {
-  const parent = child.parent
+  const parent = child.parentNode
   if (parent) parent.removeChild(child)
 }
 
@@ -33,7 +34,7 @@ function setElementText(el, text) {
 }
 
 // function setText(el, text) {
-  
+
 // }
 
 const render: any = createRenderer({
@@ -41,7 +42,7 @@ const render: any = createRenderer({
   patchProp,
   insert,
   remove,
-  setElementText,
+  setElementText
   // setText
 })
 

@@ -11,7 +11,7 @@ export function createRenderer(options) {
     setElementText: hostSetElementText,
     patchProp: hostPatchProp,
     insert: hostInsert,
-    remove: hostRemove,
+    remove: hostRemove
     // setText: hostSetText,
     // createText: hostCreateText
   } = options
@@ -19,12 +19,12 @@ export function createRenderer(options) {
   function render(vnode, container) {
     // 这里只会执行一次，因为是根节点，所以没有父节点，so，下面的父节点给了null
     // patch
-    patch(null, vnode, container, null)
+    patch(null, vnode, container, null, null)
   }
 
   // n1->oldVnode
   // n2->newVnode
-  function patch(n1, n2, container, parentComponent) {
+  function patch(n1, n2, container, parentComponent, anchor) {
     // 1. 判断新旧vnode是否是同一个对象
     // 2. 如果是同一个对象，那么就是更新操作
     // 3. 如果不是同一个对象，那么就是替换操作
@@ -36,16 +36,16 @@ export function createRenderer(options) {
 
     switch (type) {
       case Fragment:
-        processFragment(n1, n2, container, parentComponent)
+        processFragment(n1, n2, container, parentComponent, anchor)
         break
       case Text:
         processText(n1, n2, container)
         break
       default:
         if (shapeFlags & ShapeFlags.ELEMENT) {
-          processElement(n1, n2, container, parentComponent)
+          processElement(n1, n2, container, parentComponent, anchor)
         } else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
-          processComponent(n1, n2, container, parentComponent)
+          processComponent(n1, n2, container, parentComponent, anchor)
         }
         break
     }
@@ -58,21 +58,21 @@ export function createRenderer(options) {
     container.append(textNode)
   }
 
-  function processFragment(n1, n2, container, parentComponent) {
-    mountChildren(n2.children, container, parentComponent)
+  function processFragment(n1, n2, container, parentComponent, anchor) {
+    mountChildren(n2.children, container, parentComponent, anchor)
   }
 
-  function processElement(n1, n2, container, parentComponent) {
+  function processElement(n1, n2, container, parentComponent, anchor) {
     if (!n1) {
       // init
-      mountElement(n2, container, parentComponent)
+      mountElement(n2, container, parentComponent, anchor)
     } else {
       // update
-      patchElement(n1, n2, container, parentComponent)
+      patchElement(n1, n2, container, parentComponent, anchor)
     }
   }
 
-  function patchElement(n1, n2, container, parentComponent) {
+  function patchElement(n1, n2, container, parentComponent, anchor) {
     const oldProps = n1.props || EMPTY_OBJ
     const newProps = n2.props || EMPTY_OBJ
     // 为什么n2这里需要赋值？ 因为一开始的时候，n2为新节点，在mountElement节点保存了el
@@ -81,7 +81,7 @@ export function createRenderer(options) {
     // 为什么这里的el是n1（旧节点的el）
     // 因为n1是旧节点，旧节点的el是已经渲染好的，涉及到更新的话，就是更新旧节点就行
     patchProps(el, oldProps, newProps)
-    patchChildren(n1, n2, el, parentComponent)
+    patchChildren(n1, n2, el, parentComponent, anchor)
   }
 
   function patchProps(el, oldProps, newProps) {
@@ -110,7 +110,7 @@ export function createRenderer(options) {
     }
   }
 
-  function patchChildren(n1, n2, container, parentComponent) {
+  function patchChildren(n1, n2, container, parentComponent, anchor) {
     // 这里el是旧节点的el
     const prevShapeFlag = n1.shapeFlags
     const nextshapeFlags = n2.shapeFlags
@@ -131,11 +131,14 @@ export function createRenderer(options) {
         hostSetElementText(container, c2)
       }
     } else {
-      // 之前是文本，现在是数组or文本
+      // 之前是文本
       if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
         // 1. 清空文本
         hostSetElementText(container, '')
-        mountChildren(c2, container, parentComponent)
+        mountChildren(c2, container, parentComponent, anchor)
+      } else {
+        // array diff array
+        patchKeyedChildren(c1, c2, container, parentComponent, anchor)
       }
     }
   }
@@ -146,7 +149,7 @@ export function createRenderer(options) {
     })
   }
 
-  function mountElement(vnode: any, container: any, parentComponent) {
+  function mountElement(vnode: any, container: any, parentComponent, anchor) {
     const el = (vnode.el = hostCreateElement(vnode.type))
 
     // 处理children
@@ -159,7 +162,7 @@ export function createRenderer(options) {
     if (shapeFlags & ShapeFlags.TEXT_CHILDREN) {
       el.textContent = children
     } else if (shapeFlags & ShapeFlags.ARRAY_CHILDREN) {
-      mountChildren(children, el, parentComponent)
+      mountChildren(children, el, parentComponent, anchor)
     }
 
     // props
@@ -172,28 +175,113 @@ export function createRenderer(options) {
       }
     }
 
-    hostInsert(el, container)
+    hostInsert(el, container, anchor)
   }
 
-  function mountChildren(children, container, parentComponent) {
+  function mountChildren(children, container, parentComponent, anchor) {
     children.forEach(child => {
-      patch(null, child, container, parentComponent)
+      patch(null, child, container, parentComponent, anchor)
     })
   }
 
-  function processComponent(n1, n2, container, parentComponent) {
-    mountComponent(n2, container, parentComponent)
+  function patchKeyedChildren(
+    c1,
+    c2,
+    container,
+    parentComponent,
+    parentAnchor
+  ) {
+    // 新数组的当前索引
+    let i = 0
+    // e1，e2是旧新数组的最后一个索引
+    let l2 = c2.length
+    let e1 = c1.length - 1
+    let e2 = l2 - 1
+
+    function isSameVNodeType(n1, n2) {
+      // 判断这两个节点是否是同一个节点
+      // 主要判断他们的type和key
+      return n1.type === n2.type && n1.key === n2.key
+    }
+
+    // 左侧 -> 找出左边相同的节点，并且更新
+    while (i <= e1 && i <= e2) {
+      const n1 = c1[i]
+      const n2 = c2[i]
+      // 为什么相同的节点也要更新？
+      // 每个组件实例都具有自己的状态和属性，这些状态和属性可以随时更改。
+      // 因此，即使两个虚拟节点看起来相同，它们可能代表的组件实例的状态和属性可能已经发生了变化。
+      // 在这种情况下，需要使用新的属性和状态来更新组件。
+
+      // 其实如果key相同的话，结果只是一样的，仅仅是比较多了一位而已
+      if (isSameVNodeType(n1, n2)) {
+        patch(n1, n2, container, parentComponent, parentAnchor)
+      } else {
+        break
+      }
+      i++
+    }
+
+    //右侧
+    while (i <= e1 && i <= e2) {
+      const n1 = c1[e1]
+      const n2 = c2[e2]
+      if (isSameVNodeType(n1, n2)) {
+        patch(n1, n2, container, parentComponent, parentAnchor)
+      } else {
+        break
+      }
+      e1--
+      e2--
+    }
+
+    // i是当前新旧节点不一样的位置
+    // e1是旧与新节点不一样，旧的最后一个位置
+    // e2是旧与新节点不一样，新的最后一个位置
+
+    // 当前i，e1，e2的位置位置已经确定，进行增、删、移动等操作
+
+    // 新的比老的节点多 创建
+    if (i > e1) {
+      if (i <= e2) {
+        // 左右侧已经判断完毕 -> 添加：选择在xxx前插入，所以+1。
+        const nextPos = e2 + 1
+        const anchor = nextPos < l2 ? c2[nextPos].el : parentAnchor
+        while (i <= e2) {
+          // 新的比老的节点多 创建
+          patch(null, c2[i], container, parentComponent, anchor)
+          i++
+        }
+      }
+    } else if (i > e2) {
+      // 老的比新的多 删除
+      while (i <= e1) {
+        hostRemove(c1[i].el)
+        i++
+      }
+    }
+
+    // so，创建就用新的节点，删除就用老的节点，这样提高性能
   }
 
-  function mountComponent(initialVNode, container, parentComponent) {
+  function processComponent(n1, n2, container, parentComponent, anchor) {
+    mountComponent(n2, container, parentComponent, anchor)
+  }
+
+  function mountComponent(initialVNode, container, parentComponent, anchor) {
     const instance = createComponentInstance(initialVNode, parentComponent)
     // 初始化组件 调用setup函数，如果有就执行
     setupComponent(instance)
     // 渲染-> 调用render函数
-    setupRenderEffect(instance, initialVNode, container)
+    setupRenderEffect(instance, initialVNode, container, anchor)
   }
 
-  function setupRenderEffect(instance: any, initialVNode: any, container: any) {
+  function setupRenderEffect(
+    instance: any,
+    initialVNode: any,
+    container: any,
+    anchor
+  ) {
     // 当响应式对象改变的时候，重新执行render函数,这里的render
 
     // 为什么这里的effect会被执行?
@@ -205,7 +293,7 @@ export function createRenderer(options) {
         // vnode -> patch
         // vnode -> element -> mountElement
         // 初始化没有旧节点，所以传入null
-        patch(null, subTree, container, instance)
+        patch(null, subTree, container, instance, anchor)
         // 所有的element都已经mount之后
         initialVNode.el = subTree.el
 
@@ -217,7 +305,7 @@ export function createRenderer(options) {
         // 继续把当前节点赋值为旧节点，这样下次更新的时候，就可以拿到旧节点了
         instance.subTree = subTree
 
-        patch(prevTree, subTree, container, instance)
+        patch(prevTree, subTree, container, instance, anchor)
       }
     })
   }
