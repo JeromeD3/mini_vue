@@ -242,7 +242,10 @@ export function createRenderer(options) {
 
     // 当前i，e1，e2的位置位置已经确定，进行增、删、移动等操作
 
+    // so，在父容器到基础上，创建就用新的节点，删除就用老的节点，这样提高性能
+
     // 新的比老的节点多 创建
+
     if (i > e1) {
       if (i <= e2) {
         // 左右侧已经判断完毕 -> 添加：选择在xxx前插入，所以+1。
@@ -260,9 +263,57 @@ export function createRenderer(options) {
         hostRemove(c1[i].el)
         i++
       }
-    }
+    } else {
+      // 中间对比
+      let s1 = i // 老节点的开始
+      let s2 = i // 新节点的开始
 
-    // so，创建就用新的节点，删除就用老的节点，这样提高性能
+      /**
+       * 这里用于删除节点时
+       * 如果新节点已经被遍历/删除了，那么老节点就不需要再遍历了，直接删除
+       */
+      const toBePatched = e2 - s2 + 1 // 新节点的长度
+      let patched = 0 // 已经更新的节点的个数
+
+      // 存的是新节点的key和索引的映射
+      const keyToNewIndexMap = new Map()
+
+      for (let i = s2; i <= e2; i++) {
+        const nextChild = c2[i]
+        keyToNewIndexMap.set(nextChild.key, i)
+      }
+
+      for (let i = s1; i <= e1; i++) {
+        const prevChild = c1[i] // 拿到老节点
+        let newIndex
+
+        if (patched >= toBePatched) {
+          hostRemove(prevChild.el)
+          continue
+        }
+        // 这里会满足null和undefined
+        if (prevChild.key !== null) {
+          // 有之前的key，不用去对比
+          newIndex = keyToNewIndexMap.get(prevChild.key)
+        } else {
+          //
+        }
+
+        // 删除操作
+        if (newIndex === undefined) {
+          // 没有找到/key不一样，就删除
+          hostRemove(prevChild.el)
+        } else {
+          // 找到了，就更新
+          patch(prevChild, c2[newIndex], container, parentComponent, null)
+          patched++
+        }
+
+        // 新增操作
+
+        // 移动操作
+      }
+    }
   }
 
   function processComponent(n1, n2, container, parentComponent, anchor) {
