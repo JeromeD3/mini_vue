@@ -39,8 +39,7 @@ export function createVNode(type, props?, children?) {
 }
 
 export function createTextVNode(text: string) {
-  const a = createVNode(Text, {}, text)
-  return a
+  return createVNode(Text, {}, text)
 }
 
 function getShapeFlag(type) {
