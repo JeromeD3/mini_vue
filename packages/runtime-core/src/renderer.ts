@@ -72,6 +72,14 @@ export function createRenderer(options) {
     }
   }
 
+  /**
+   * 用于更新element
+   * @param n1
+   * @param n2
+   * @param container
+   * @param parentComponent
+   * @param anchor
+   */
   function patchElement(n1, n2, container, parentComponent, anchor) {
     const oldProps = n1.props || EMPTY_OBJ
     const newProps = n2.props || EMPTY_OBJ
@@ -278,6 +286,22 @@ export function createRenderer(options) {
       // 存的是新节点的key和索引的映射
       const keyToNewIndexMap = new Map()
 
+      /**
+       * 最长递增子序列思想：
+       * 根据索引来判断，如果新节点的索引是递增的，就保存下来
+       * 然后就可以知道，哪些节点是需要移动或者删除的
+       *
+       */
+      // 创建一个定长的数组，节省性能,如果检测到为0，就证明节点在老的里面不存在，需要创建
+      const newIndexToOldIndexMap = new Array(toBePatched)
+      for (let i = 0; i < toBePatched; i++) newIndexToOldIndexMap[i] = 0
+
+      /**
+       * 判断节点是否需要移动
+       */
+      let moved = false
+      let maxNewIndexSoFar = 0
+
       for (let i = s2; i <= e2; i++) {
         const nextChild = c2[i]
         keyToNewIndexMap.set(nextChild.key, i)
@@ -287,16 +311,25 @@ export function createRenderer(options) {
         const prevChild = c1[i] // 拿到老节点
         let newIndex
 
+        // 如果新节点已经遍历完了，老节点后面还有值，则把老节点后面的全部删除
         if (patched >= toBePatched) {
           hostRemove(prevChild.el)
           continue
         }
+
         // 这里会满足null和undefined
         if (prevChild.key !== null) {
           // 有之前的key，不用去对比
           newIndex = keyToNewIndexMap.get(prevChild.key)
         } else {
-          //
+          // 如果之前的节点没有key属性，需要在新节点列表中查找与之前节点相同类型的节点
+          // 从后往前遍历新节点列表，查找第一个与之前节点类型相同的节点
+          for (let j = s2; i <= e2; i++) {
+            if (isSameVNodeType(prevChild, c2[j])) {
+              newIndex = j
+              break
+            }
+          }
         }
 
         // 删除操作
@@ -304,14 +337,51 @@ export function createRenderer(options) {
           // 没有找到/key不一样，就删除
           hostRemove(prevChild.el)
         } else {
-          // 找到了，就更新
+          if (newIndex >= maxNewIndexSoFar) {
+            maxNewIndexSoFar = newIndex
+          } else {
+            // 认定当前节点是需要移动的，否则就跳过，因为进行最长递增子序列判断也是需要一定性能的
+            moved = true
+          }
+
+          // 找到相同节点，更新
+          // 存储相同节点的索引
+          newIndexToOldIndexMap[newIndex - s2] = i + 1
           patch(prevChild, c2[newIndex], container, parentComponent, null)
           patched++
         }
+      }
+
+      // abc
+      // ebc -> 12
+      const increasingNewIndexSequence = moved
+        ? getSequence(newIndexToOldIndexMap)
+        : []
+      let j = increasingNewIndexSequence.length - 1
+      // 倒序开始循环
+      // 这里倒序是因为在insert的时候，需要保证锚点是处理完的节点，也就是已经确定位置的节点
+
+      for (let i = toBePatched - 1; i >= 0; i--) {
+        // 新节点的索引（倒序）
+        const nextIndex = i + s2
+        const nextChild = c2[nextIndex]
+        // 插入到下一个节点的前面，如果没有就插入到最后
+        const anchor = nextIndex + 1 < l2 ? c2[nextIndex + 1].el : null
 
         // 新增操作
+        if (newIndexToOldIndexMap[i] === 0) {
+          patch(null, nextChild, container, parentComponent, anchor)
+        }
 
-        // 移动操作
+        if (moved) {
+          // 如果新节点的索引不在递增的序列中，就插入
+          if (j < 0 || i !== increasingNewIndexSequence[j]) {
+            // 移动操作
+            hostInsert(nextChild.el, container, anchor)
+          } else {
+            j--
+          }
+        }
       }
     }
   }
@@ -366,3 +436,73 @@ export function createRenderer(options) {
     createApp: createAppAPI(render)
   }
 }
+
+/**
+ *
+ * @param arr
+ * @returns number[]
+ */
+function getSequence(arr: number[]): number[] {
+  const p = arr.slice()
+  const result = [0]
+  let i, j, u, v, c
+  const len = arr.length
+  for (i = 0; i < len; i++) {
+    const arrI = arr[i]
+    if (arrI !== 0) {
+      j = result[result.length - 1]
+      if (arr[j] < arrI) {
+        p[i] = j
+        result.push(i)
+        continue
+      }
+      u = 0
+      v = result.length - 1
+      while (u < v) {
+        c = (u + v) >> 1
+        if (arr[result[c]] < arrI) {
+          u = c + 1
+        } else {
+          v = c
+        }
+      }
+      if (arrI < arr[result[u]]) {
+        if (u > 0) {
+          p[i] = result[u - 1]
+        }
+        result[u] = i
+      }
+    }
+  }
+  u = result.length
+  v = result[u - 1]
+  while (u-- > 0) {
+    result[u] = v
+    v = p[v]
+  }
+  return result
+}
+
+// diff 算法流程：
+// 1. 先对比两边，两边做创建和删除操作（注意没有移动，不一样的就删除），这里调用patch重新渲染节点，
+// 为什么重新渲染，因为他们的props和children有可能发生变化，需要重新判断
+// 2. 然后锁定中间不一样的
+// 3. 删除老的节点 -> 在老的存在，新的不存在 -> 需要删除，否则重新渲染节点
+// 在此之间，判断需要是否移动
+// 4. 判断是否需要移动，为什么需要判断？为了减少最长递增子序列的判断，减少移动次数 -> 因为这个算法也会消耗一定性能
+// 5. 等到删除逻辑全部执行完后，进行最长递增子序列对比
+// 6. 新节点在老节点的索引位置数组（key新节点：老节点索引）-> 求最长递增子序列 -> 如果没有变化的话，索引是递增的，得到新节点有哪些是递增，返回数组
+// 7. 通过映射判断，在老节点不存在，新节点存在的元素，直接通过patch新增
+// 8. 递增数组 -> 找到不是递增的元素（需要移动）的索引和dom元素，在移动位置的元素前一个位置新增元素
+// 9. 新增和移动的锚点如何确定？
+// 10. 倒序判断新节点数组，判断当前元素是否在递增数组中，如果不在就需要移动/新增，
+// 11. 因为前面的已经判断过了，能确定他们是稳定不需要移动的节点，而新节点的位置是在他们的前面，所以直接移动或者插入到他们的前面
+
+// 思考
+// 最长递增子序列做了哪些事情
+// 为什么用它，解决了什么问题
+
+//答： 找到了新节点（去掉相同节点的）需要移动的节点，为了减少移动次数
+// 那么为什么最长递增子序列就可以保证移动次数最少呢？
+// 因为在位置数组中递增就能保证在旧数组中的相对位置的有序性，从而不需要移动，
+// 因此递增子序列的最长可以保证移动次数的最少
