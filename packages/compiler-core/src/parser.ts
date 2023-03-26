@@ -1,7 +1,7 @@
-import { NodeTypes } from './ast'
+import { NodeTypes, TagType } from './ast'
 
 interface IRoot {
-  children: Array<IIterpolation[]>
+  children: Array<IIterpolation | IElement>
 }
 
 interface IIterpolation {
@@ -16,13 +16,18 @@ interface IParserContext {
   source: string
 }
 
+interface IElement {
+  type: NodeTypes.ELEMENT
+  tag: string
+}
+
 export function baseParse(content: string) {
   const context = createParserContext(content)
   return createRoot(parserChildren(context))
 }
 
-function parserChildren(context): Array<IIterpolation[]> {
-  // [ [
+function parserChildren(context): Array<IIterpolation | IElement> {
+  // [
   //   {
   //     type: NodeTypes.INTERPOLATION,
   //     content: {
@@ -30,22 +35,40 @@ function parserChildren(context): Array<IIterpolation[]> {
   //       content: content
   //     }
   //   }
-  // ]
+  //
   // ]
 
-  const nodes: IIterpolation[][] = []
+  const nodes: Array<IIterpolation | IElement> = []
   let node
+  const contextSource = context.source
 
-  // 判断是否是插值
-  if (context.source.startsWith('{{')) {
+  if (contextSource.startsWith('{{')) {
+    // 判断是否是插值
     node = parserInterpolation(context)
+  } else if (contextSource[0] === '<') {
+    if (/[a-z]/i.test(contextSource[1])) {
+      node = parseElement(context)
+    }
   }
 
   nodes.push(node)
+
   return nodes
 }
 
-function parserInterpolation(context: any): IIterpolation[] {
+function createRoot(children): IRoot {
+  return {
+    children
+  }
+}
+
+function createParserContext(content: string): IParserContext {
+  return {
+    source: content
+  }
+}
+
+function parserInterpolation(context: any): IIterpolation {
   // {{message}}
 
   const openDelimiter = '{{'
@@ -71,29 +94,43 @@ function parserInterpolation(context: any): IIterpolation[] {
   // 因为后续还有其他的解析，所以不能用length来做判断
   // context.source.slice(2, context.source.length - 2)
 
-  return [
-    {
-      type: NodeTypes.INTERPOLATION,
-      content: {
-        type: NodeTypes.SIMPLE_EXPRESSION,
-        content: content
-      }
+  return {
+    type: NodeTypes.INTERPOLATION,
+    content: {
+      type: NodeTypes.SIMPLE_EXPRESSION,
+      content: content
     }
-  ]
+  }
+}
+
+function parseElement(context: any) {
+  // Implement later
+  // 1. 解析tag
+  const element = parserTag(context, TagType.START)
+  parserTag(context, TagType.END)
+  return element
+}
+
+function parserTag(context: any, type: TagType) {
+  const match: any = /^<\/?([a-z]*)/i.exec(context.source)
+  const tag = match[1]
+
+  // 2. 删除处理完成的代码
+  // 为什么要删除呢？
+  // 因为后续还有其他的解析，而且这里用到了length做判断
+
+  advanceBy(context, match[0].length + 1)
+  console.log(match)
+  console.log(context.source)
+
+  if (type === TagType.END) return
+
+  return {
+    type: NodeTypes.ELEMENT,
+    tag
+  }
 }
 
 function advanceBy(context: any, length: number) {
   context.source = context.source.slice(length)
-}
-
-function createRoot(children): IRoot {
-  return {
-    children
-  }
-}
-
-function createParserContext(content: string): IParserContext {
-  return {
-    source: content
-  }
 }
