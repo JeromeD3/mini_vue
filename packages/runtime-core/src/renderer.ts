@@ -5,6 +5,7 @@ import { Fragment, Text } from './vnode'
 import { effect } from '../../reactivity/src/effect'
 import { EMPTY_OBJ } from '../../shared/src/'
 import { shouldUpdateComponent } from './componentUpdateUtils'
+import { queueJobs } from './shcheduler'
 
 export function createRenderer(options) {
   const {
@@ -430,36 +431,43 @@ export function createRenderer(options) {
     // 当响应式对象改变的时候，重新执行render函数,这里的render
 
     // 为什么这里的effect会被执行?
-    instance.update = effect(() => {
-      if (!instance.isMounted) {
-        const { proxy } = instance
-        // 在初始化的时候存了旧节点
-        const subTree = (instance.subTree = instance.render.call(proxy))
-        // vnode -> patch
-        // vnode -> element -> mountElement
-        // 初始化没有旧节点，所以传入null
-        patch(null, subTree, container, instance, anchor)
-        // 所有的element都已经mount之后
-        initialVNode.el = subTree.el
+    instance.update = effect(
+      () => {
+        if (!instance.isMounted) {
+          const { proxy } = instance
+          // 在初始化的时候存了旧节点
+          const subTree = (instance.subTree = instance.render.call(proxy))
+          // vnode -> patch
+          // vnode -> element -> mountElement
+          // 初始化没有旧节点，所以传入null
+          patch(null, subTree, container, instance, anchor)
+          // 所有的element都已经mount之后
+          initialVNode.el = subTree.el
 
-        instance.isMounted = true
-      } else {
-        // 需要一个vnode更新后的
-        const { vnode, next } = instance
-        if (next) {
-          next.el = vnode.el
-          // 更新组件上的props
-          updateComponentPreRender(instance, next)
+          instance.isMounted = true
+        } else {
+          // 需要一个vnode更新后的
+          const { vnode, next } = instance
+          if (next) {
+            next.el = vnode.el
+            // 更新组件上的props
+            updateComponentPreRender(instance, next)
+          }
+          const { proxy } = instance
+          const subTree = instance.render.call(proxy)
+          const prevTree = instance.subTree
+          // 继续把当前节点赋值为旧节点，这样下次更新的时候，就可以拿到旧节点了
+          instance.subTree = subTree
+
+          patch(prevTree, subTree, container, instance, anchor)
         }
-        const { proxy } = instance
-        const subTree = instance.render.call(proxy)
-        const prevTree = instance.subTree
-        // 继续把当前节点赋值为旧节点，这样下次更新的时候，就可以拿到旧节点了
-        instance.subTree = subTree
-
-        patch(prevTree, subTree, container, instance, anchor)
+      },
+      {
+        scheduler() {
+          queueJobs(instance.update)
+        }
       }
-    })
+    )
   }
 
   return {
