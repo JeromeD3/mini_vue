@@ -32,17 +32,6 @@ export function baseParse(content: string) {
 }
 
 function parserChildren(context): Array<IIterpolation | IElement | IText> {
-  // [
-  //   {
-  //     type: NodeTypes.INTERPOLATION,
-  //     content: {
-  //       type: NodeTypes.SIMPLE_EXPRESSION,
-  //       content: content
-  //     }
-  //   }
-  //
-  // ]
-
   const nodes: Array<IIterpolation | IElement | IText> = []
   let node
   const contextSource = context.source
@@ -114,7 +103,6 @@ function parseInterpolation(context: any): IIterpolation {
 }
 
 function parseElement(context: any) {
-  // Implement later
   // 1. 解析tag
   const element = parseTag(context, TagType.START)
   parseTag(context, TagType.END)
