@@ -23,7 +23,8 @@ describe('Parse', () => {
 
       expect(ast.children[0]).toStrictEqual({
         type: NodeTypes.ELEMENT,
-        tag: 'div'
+        tag: 'div',
+        children: []
       })
     })
   })
@@ -37,5 +38,65 @@ describe('Parse', () => {
         content: 'some text'
       })
     })
+  })
+
+  it('union', () => {
+    const ast = baseParse('<p>hi, {{ message }}</p>')
+
+    expect(ast.children[0]).toStrictEqual({
+      type: NodeTypes.ELEMENT,
+      tag: 'p',
+      children: [
+        {
+          type: NodeTypes.TEXT,
+          content: 'hi, '
+        },
+        {
+          type: NodeTypes.INTERPOLATION,
+          content: {
+            type: NodeTypes.SIMPLE_EXPRESSION,
+            content: 'message'
+          }
+        }
+      ]
+    })
+  })
+
+  it('nest Element', () => {
+    const ast = baseParse('<p><div>hi</div>hi, {{ message }}</p>')
+
+    expect(ast.children[0]).toStrictEqual({
+      type: NodeTypes.ELEMENT,
+      tag: 'p',
+      children: [
+        {
+          type: NodeTypes.ELEMENT,
+          tag: 'div',
+          children: [
+            {
+              type: NodeTypes.TEXT,
+              content: 'hi'
+            }
+          ]
+        },
+        {
+          type: NodeTypes.TEXT,
+          content: 'hi, '
+        },
+        {
+          type: NodeTypes.INTERPOLATION,
+          content: {
+            type: NodeTypes.SIMPLE_EXPRESSION,
+            content: 'message'
+          }
+        }
+      ]
+    })
+  })
+
+  test.only('parse error when lack end tag', () => {
+    expect(() => {
+      baseParse('<div></p>')
+    }).toThrow(`标签不匹配,缺少div标签`)
   })
 })
