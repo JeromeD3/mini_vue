@@ -19,6 +19,7 @@ export function createComponentInstance(vnode, parent) {
     setupState: {},
     props: {},
     slots: {},
+    next: null, // 下次要更新的虚拟节点,也就是n2
     provides: parent ? parent.provides : {},
     parent,
     isMounted: false,

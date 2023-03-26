@@ -4,6 +4,7 @@ import { createAppAPI } from './createApp'
 import { Fragment, Text } from './vnode'
 import { effect } from '../../reactivity/src/effect'
 import { EMPTY_OBJ } from '../../shared/src/'
+import { shouldUpdateComponent } from './componentUpdateUtils'
 
 export function createRenderer(options) {
   const {
@@ -387,15 +388,37 @@ export function createRenderer(options) {
   }
 
   function processComponent(n1, n2, container, parentComponent, anchor) {
-    mountComponent(n2, container, parentComponent, anchor)
+    if (!n1) {
+      mountComponent(n2, container, parentComponent, anchor)
+    } else {
+      updateComponent(n1, n2, container)
+    }
   }
 
   function mountComponent(initialVNode, container, parentComponent, anchor) {
-    const instance = createComponentInstance(initialVNode, parentComponent)
+    const instance = (initialVNode.component = createComponentInstance(
+      initialVNode,
+      parentComponent
+    ))
     // 初始化组件 调用setup函数，如果有就执行
     setupComponent(instance)
     // 渲染-> 调用render函数
     setupRenderEffect(instance, initialVNode, container, anchor)
+  }
+
+  function updateComponent(n1, n2, container) {
+    // 为什么需要提上来？
+    // 因为如果不需要更新的话，他的n2就不会被赋值了，
+    // 这样就会导致后面的n2 拿到的是一个空的
+    const instance = (n2.component = n1.component)
+
+    if (shouldUpdateComponent(n1, n2)) {
+      instance.next = n2
+      instance.update()
+    } else {
+      n2.el = n1.el
+      instance.vnode = n2
+    }
   }
 
   function setupRenderEffect(
@@ -407,7 +430,7 @@ export function createRenderer(options) {
     // 当响应式对象改变的时候，重新执行render函数,这里的render
 
     // 为什么这里的effect会被执行?
-    effect(() => {
+    instance.update = effect(() => {
       if (!instance.isMounted) {
         const { proxy } = instance
         // 在初始化的时候存了旧节点
@@ -421,6 +444,13 @@ export function createRenderer(options) {
 
         instance.isMounted = true
       } else {
+        // 需要一个vnode更新后的
+        const { vnode, next } = instance
+        if (next) {
+          next.el = vnode.el
+          // 更新组件上的props
+          updateComponentPreRender(instance, next)
+        }
         const { proxy } = instance
         const subTree = instance.render.call(proxy)
         const prevTree = instance.subTree
@@ -435,6 +465,12 @@ export function createRenderer(options) {
   return {
     createApp: createAppAPI(render)
   }
+}
+
+function updateComponentPreRender(instance, nextVnode) {
+  instance.vnode = nextVnode
+  instance.next = null
+  instance.props = nextVnode.props
 }
 
 /**

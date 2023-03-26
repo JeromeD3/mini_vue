@@ -15,6 +15,7 @@ export function createVNode(type, props?, children?) {
     type,
     props,
     children,
+    component: null,
     shapeFlags: getShapeFlag(type),
     el: null,
     key: props && props.key
