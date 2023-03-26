@@ -21,12 +21,17 @@ interface IElement {
   tag: string
 }
 
+interface IText {
+  type: NodeTypes.TEXT
+  content: string
+}
+
 export function baseParse(content: string) {
   const context = createParserContext(content)
   return createRoot(parserChildren(context))
 }
 
-function parserChildren(context): Array<IIterpolation | IElement> {
+function parserChildren(context): Array<IIterpolation | IElement | IText> {
   // [
   //   {
   //     type: NodeTypes.INTERPOLATION,
@@ -38,19 +43,23 @@ function parserChildren(context): Array<IIterpolation | IElement> {
   //
   // ]
 
-  const nodes: Array<IIterpolation | IElement> = []
+  const nodes: Array<IIterpolation | IElement | IText> = []
   let node
   const contextSource = context.source
 
   if (contextSource.startsWith('{{')) {
     // 判断是否是插值
-    node = parserInterpolation(context)
+    node = parseInterpolation(context)
   } else if (contextSource[0] === '<') {
     if (/[a-z]/i.test(contextSource[1])) {
       node = parseElement(context)
     }
   }
 
+  if (!node) {
+    // 处理字符串
+    node = parserText(context)
+  }
   nodes.push(node)
 
   return nodes
@@ -68,7 +77,7 @@ function createParserContext(content: string): IParserContext {
   }
 }
 
-function parserInterpolation(context: any): IIterpolation {
+function parseInterpolation(context: any): IIterpolation {
   // {{message}}
 
   const openDelimiter = '{{'
@@ -79,16 +88,17 @@ function parserInterpolation(context: any): IIterpolation {
     openDelimiter.length
   )
 
-  // 推进代码，将代码按逻辑切割
+  // 指针前进位置
   advanceBy(context, openDelimiter.length)
 
   const rawContentLength = closeIndex - openDelimiter.length
 
   // 未处理过的，可能有空格的情况
-  const rawcontent = context.source.slice(0, rawContentLength)
+  const rawcontent = parseTextData(context, rawContentLength)
   const content = rawcontent.trim()
 
-  advanceBy(context, rawContentLength + closeDelimiter.length)
+  // 删除}}
+  advanceBy(context, closeDelimiter.length)
 
   //为什么不这样写？
   // 因为后续还有其他的解析，所以不能用length来做判断
@@ -106,12 +116,12 @@ function parserInterpolation(context: any): IIterpolation {
 function parseElement(context: any) {
   // Implement later
   // 1. 解析tag
-  const element = parserTag(context, TagType.START)
-  parserTag(context, TagType.END)
+  const element = parseTag(context, TagType.START)
+  parseTag(context, TagType.END)
   return element
 }
 
-function parserTag(context: any, type: TagType) {
+function parseTag(context: any, type: TagType) {
   const match: any = /^<\/?([a-z]*)/i.exec(context.source)
   const tag = match[1]
 
@@ -120,8 +130,6 @@ function parserTag(context: any, type: TagType) {
   // 因为后续还有其他的解析，而且这里用到了length做判断
 
   advanceBy(context, match[0].length + 1)
-  console.log(match)
-  console.log(context.source)
 
   if (type === TagType.END) return
 
@@ -131,6 +139,22 @@ function parserTag(context: any, type: TagType) {
   }
 }
 
+function parserText(context: any): IText {
+  const content = parseTextData(context, context.source.length)
+
+  // 推进
+  advanceBy(context, content.length)
+
+  return {
+    type: NodeTypes.TEXT,
+    content
+  }
+}
+
 function advanceBy(context: any, length: number) {
   context.source = context.source.slice(length)
+}
+
+function parseTextData(context: any, length) {
+  return context.source.slice(0, length)
 }
