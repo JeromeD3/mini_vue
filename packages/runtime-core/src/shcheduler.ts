@@ -9,7 +9,6 @@ export function nextTick(fn) {
 export function queueJobs(job) {
   if (!queue.includes(job)) {
     queue.push(job)
-    console.log('queue', queue)
   }
 
   queueFlush()
