@@ -1,24 +1,7 @@
 import { NodeTypes, TagType } from './ast'
 
-interface IRoot {
-  children: Array<IIterpolation | IElement>
-}
-
-interface IIterpolation {
-  type: NodeTypes.INTERPOLATION
-  content: {
-    type: NodeTypes.SIMPLE_EXPRESSION
-    content: string
-  }
-}
-
 interface IParserContext {
   source: string
-}
-
-interface IElement {
-  type: NodeTypes.ELEMENT
-  tag: string
 }
 
 interface IText {
@@ -31,11 +14,8 @@ export function baseParse(content: string) {
   return createRoot(parseChildren(context, []))
 }
 
-function parseChildren(
-  context,
-  ancestors
-): Array<IIterpolation | IElement | IText> {
-  const nodes: Array<IIterpolation | IElement | IText> = []
+function parseChildren(context, ancestors) {
+  const nodes: any = []
 
   while (!isEnd(context, ancestors)) {
     let node
@@ -82,7 +62,7 @@ function isEnd(context, ancestors) {
   return !s
 }
 
-function createRoot(children): IRoot {
+function createRoot(children) {
   return {
     children
   }
@@ -94,7 +74,7 @@ function createParserContext(content: string): IParserContext {
   }
 }
 
-function parseInterpolation(context: any): IIterpolation {
+function parseInterpolation(context: any) {
   // {{message}}
 
   const openDelimiter = '{{'
