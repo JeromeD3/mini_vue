@@ -1,8 +1,12 @@
-export function transform(root, options) {
+export function transform(root, options = {}) {
   const ctx = createTransformContext(root, options)
   // 1. 遍历 -> 深度优先搜索
   // 2. 修改 text content
   tranverseNode(root, ctx)
+
+  //root.codeGenNode
+  // 要对哪棵树进行修改
+  createRootCodeGen(root)
 }
 
 function createTransformContext(root: any, options: any) {
@@ -11,6 +15,10 @@ function createTransformContext(root: any, options: any) {
     nodeTransforms: options.nodeTransforms || []
   }
   return context
+}
+
+function createRootCodeGen(root: any) {
+  root.codeGenNode = root.children[0]
 }
 
 function tranverseNode(node: any, ctx) {
