@@ -122,7 +122,7 @@ function parseElement(context: any, ancestors) {
   ancestors.pop()
 
   //  标签相同才解析，否则抛出错误
-  if (startsWithEndTagOpen(context.source, element.tag) == element.tag) {
+  if (startsWithEndTagOpen(context.source, element.tag)) {
     // 2. 解析结束tag
     parseTag(context, TagType.END)
   } else {
