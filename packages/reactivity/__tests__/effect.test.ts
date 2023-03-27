@@ -16,9 +16,12 @@ describe('effect', () => {
     effect(() => {
       console.log('fn执行')
       nextAge = user.age + 1
+      //这里的收集到的依赖为：age：Set{fn}
+      // 这里的fn为effect中的整个函数
     })
 
     effect(() => {
+      // 因为这个函数没有对响应式数据进行操作，所以不会收集依赖
       console.log('fn执行2')
     })
     // 并不是说，传了effect 他就会收集依赖，而是在执行fn的时候，

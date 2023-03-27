@@ -431,6 +431,8 @@ export function createRenderer(options) {
     // 当响应式对象改变的时候，重新执行render函数,这里的render
 
     // 为什么这里的effect会被执行?
+    // 因为这里对响应式对象进行了get操作，所以会触发effect，所以把这里整个函数都存起来
+    // 下一次响应式数据变化了，整个函数重新执行
     instance.update = effect(
       () => {
         if (!instance.isMounted) {
