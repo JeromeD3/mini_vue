@@ -1,6 +1,6 @@
 import { NodeTypes } from '../src/ast'
 import { baseParse } from '../src/parser'
-import { transform } from '../src/transform/transform'
+import { transform } from '../src/transform'
 
 describe('transform', () => {
   it('should transform simple element', () => {
