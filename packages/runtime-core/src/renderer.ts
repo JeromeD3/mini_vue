@@ -437,8 +437,13 @@ export function createRenderer(options) {
       () => {
         if (!instance.isMounted) {
           const { proxy } = instance
+
           // 在初始化的时候存了旧节点
-          const subTree = (instance.subTree = instance.render.call(proxy))
+          //  第二个proxy 指render函数的第一个参数ctx
+          const subTree = (instance.subTree = instance.render.call(
+            proxy,
+            proxy
+          ))
           // vnode -> patch
           // vnode -> element -> mountElement
           // 初始化没有旧节点，所以传入null
@@ -456,7 +461,8 @@ export function createRenderer(options) {
             updateComponentPreRender(instance, next)
           }
           const { proxy } = instance
-          const subTree = instance.render.call(proxy)
+          //  第二个proxy 指render函数的第一个参数ctx
+          const subTree = instance.render.call(proxy, proxy)
           const prevTree = instance.subTree
           // 继续把当前节点赋值为旧节点，这样下次更新的时候，就可以拿到旧节点了
           instance.subTree = subTree

@@ -3,6 +3,7 @@ import { ShapeFlags } from '../../shared/src/ShapeFlags'
 export const Fragment = Symbol('Fragment')
 export const Text = Symbol('Text')
 
+export { createVNode as createElementVNode }
 /**
  *
  * @param type

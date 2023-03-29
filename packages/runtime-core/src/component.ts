@@ -66,6 +66,15 @@ function handleSetupResult(instance, setupResult: any) {
 
 function finishComponentSetup(instance: any) {
   const Component = instance.type
+
+  // 用户的render函数是最高的
+  // 否则就调用template返回的
+  if (compiler && !Component.render) {
+    // 看用户有没有自定义的template
+    if (Component.template) {
+      Component.render = compiler(Component.template)
+    }
+  }
   instance.render = Component.render
 }
 
@@ -77,4 +86,10 @@ export function getCurrentInstance() {
 
 function setCurrentInstance(instance) {
   currentInstance = instance
+}
+
+let compiler
+
+export function registerRuntimeCompiler(_compiler) {
+  compiler = _compiler
 }
