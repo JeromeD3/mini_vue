@@ -12,6 +12,7 @@ describe('transform', () => {
       }
     }
 
+    // 插件：对特定节点做特定操作
     transform(ast, {
       nodeTransforms: [plugin]
     })
