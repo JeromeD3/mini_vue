@@ -1,5 +1,5 @@
 {
-  "name": "@jerome778/runtime-dom",
+  "name": "@jerome778/compiler-core",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@jerome778/runtime-core": "workspace:^1.0.0",
     "@jerome778/shared": "workspace:^1.0.1"
   }
 }
