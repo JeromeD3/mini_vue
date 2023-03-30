@@ -1,4 +1,5 @@
 export * from './toDisplayString'
+export * from './ShapeFlags'
 
 export const extend = Object.assign
 
