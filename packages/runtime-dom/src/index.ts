@@ -1,4 +1,4 @@
-import { createRenderer } from '../../runtime-core/src'
+import { createRenderer } from '@jerome778/runtime-core'
 
 function createElement(type) {
   return document.createElement(type)
@@ -50,4 +50,4 @@ export function createApp(...args) {
   return render.createApp(...args)
 }
 
-export * from '../../runtime-core/src'
+export * from '@jerome778/runtime-core'

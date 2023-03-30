@@ -1,4 +1,4 @@
-import { ShapeFlags } from '../../shared/src/ShapeFlags'
+import { ShapeFlags } from "@jerome778/shared"
 
 export const Fragment = Symbol('Fragment')
 export const Text = Symbol('Text')

@@ -1,4 +1,4 @@
-import { isString } from '../../shared/src'
+import { isString } from '@jerome778/shared'
 import { NodeTypes } from './ast'
 import {
   CREATE_ELEMENT_VNODE,

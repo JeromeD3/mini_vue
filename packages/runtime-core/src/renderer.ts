@@ -1,11 +1,10 @@
-import { ShapeFlags } from '../../shared/src/ShapeFlags'
 import { createComponentInstance, setupComponent } from './component'
 import { createAppAPI } from './createApp'
 import { Fragment, Text } from './vnode'
-import { effect } from '../../reactivity/src/effect'
-import { EMPTY_OBJ } from '../../shared/src/'
 import { shouldUpdateComponent } from './componentUpdateUtils'
 import { queueJobs } from './shcheduler'
+import { EMPTY_OBJ, ShapeFlags } from '@jerome778/shared'
+import { effect } from '@jerome778/reactivity'
 
 export function createRenderer(options) {
   const {

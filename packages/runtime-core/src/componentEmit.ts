@@ -1,4 +1,4 @@
-import { camelize, pipe, toHandlerKey } from '../../shared/src/index'
+import { camelize, pipe, toHandlerKey } from '@jerome778/shared'
 
 export function emit(instance, event, ...args) {
   const { props } = instance

@@ -1,5 +1,4 @@
-import { extend, isObject } from '../../shared/src/index'
-// import { extend, isObject } from '@jerome778/shared'
+import { extend, isObject } from '@jerome778/shared'
 import { track, trigger } from './effect'
 import { reactive, reactiveFlags, readonly } from './reactive'
 

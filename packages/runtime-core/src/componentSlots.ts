@@ -1,4 +1,5 @@
-import { ShapeFlags } from '../../shared/src/ShapeFlags'
+import { ShapeFlags } from '@jerome778/shared'
+
 export function initSlots(instance, children) {
   const { vnode } = instance
 
@@ -23,7 +24,7 @@ function normalizeObjectSlots(children: any, slots: any) {
 
       // 这里主要做的操作是将h函数传过来的函数进行了处理,返回vnode，作用域插槽的时候会用到
       // 到时调用this.$slots的时候就会返回对应的vnode
-      
+
       slots[key] = props => {
         return normalizeSlotValue(value(props))
       }

@@ -1,9 +1,8 @@
-import { PublicInstanceProxyHandlers } from '../../reactivity/src/componentPublicInstance'
+import { proxyRefs, shallowReadonly } from '@jerome778/reactivity'
+import { PublicInstanceProxyHandlers } from './componentPublicInstance'
 import { initProps } from './componentProps'
-import { shallowReadonly } from '../../reactivity/src/reactive'
 import { emit } from './componentEmit'
 import { initSlots } from './componentSlots'
-import { proxyRefs } from '../../reactivity/src'
 
 /**
  *
