@@ -94,7 +94,7 @@ describe('Parse', () => {
     })
   })
 
-  test.only('parse error when lack end tag', () => {
+  test('parse error when lack end tag', () => {
     expect(() => {
       baseParse('<div></p>')
     }).toThrow(`标签不匹配,缺少div标签`)

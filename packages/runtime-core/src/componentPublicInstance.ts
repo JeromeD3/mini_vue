@@ -1,5 +1,4 @@
-import { hasOwn } from '../../shared/src/index'
-// import { hasOwn } from "@jerome778/shared"
+import { hasOwn } from "@jerome778/shared"
 
 const publicPropertiesMap = {
   $el: i => i.vnode.el,

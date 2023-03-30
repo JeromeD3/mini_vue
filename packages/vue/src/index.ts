@@ -1,8 +1,8 @@
-export * from './runtime-dom/src'
+export * from '@jerome778/runtime-dom'
 
-import * as runtimeDom from './runtime-dom/src'
-import { baseCompile } from './compiler-core/src'
-import { registerRuntimeCompiler } from './runtime-dom/src'
+import * as runtimeDom from '@jerome778/runtime-dom'
+import { baseCompile } from '@jerome778/compiler-core'
+import { registerRuntimeCompiler } from '@jerome778/runtime-dom'
 
 // 返回render函数 -> vnode
 function compileToFunction(template) {
