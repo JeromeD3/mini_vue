@@ -24,22 +24,44 @@ importers:
       typescript: 4.9.5
       vitest: 0.29.2
 
+  packages/compiler-core:
+    specifiers:
+      '@jerome778/shared': workspace:^1.0.1
+    dependencies:
+      '@jerome778/shared': link:../shared
+
   packages/reactivity:
     specifiers:
-      '@jerome778/shared': workspace:^1.0.0
+      '@jerome778/shared': workspace:^1.0.1
     dependencies:
       '@jerome778/shared': link:../shared
 
   packages/runtime-core:
     specifiers:
-      '@jerome778/reactivity': workspace:^1.0.0
-      '@jerome778/shared': workspace:^1.0.0
+      '@jerome778/reactivity': workspace:^1.0.1
+      '@jerome778/shared': workspace:^1.0.1
     dependencies:
       '@jerome778/reactivity': link:../reactivity
       '@jerome778/shared': link:../shared
 
+  packages/runtime-dom:
+    specifiers:
+      '@jerome778/runtime-core': workspace:^1.0.0
+      '@jerome778/shared': workspace:^1.0.1
+    dependencies:
+      '@jerome778/runtime-core': link:../runtime-core
+      '@jerome778/shared': link:../shared
+
   packages/shared:
     specifiers: {}
+
+  packages/vue:
+    specifiers:
+      '@jerome778/compiler-core': workspace:^1.0.0
+      '@jerome778/runtime-dom': workspace:^1.0.0
+    dependencies:
+      '@jerome778/compiler-core': link:../compiler-core
+      '@jerome778/runtime-dom': link:../runtime-dom
 
 packages:
 

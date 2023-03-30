@@ -11,4 +11,4 @@ TODOs.md
 dts-build/packages
 *.tsbuildinfo
 lib
-example
+examples
