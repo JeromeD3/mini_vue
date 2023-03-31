@@ -1,4 +1,4 @@
-import esbuild from 'rollup-plugin-esbuild'
+import typescript from '@rollup/plugin-typescript'
 export default {
   input: './packages/vue/src/index.ts',
   output: [
@@ -9,9 +9,10 @@ export default {
     },
     // esm
     {
+      name: 'vue',
       format: 'es',
       file: 'packages/vue/dist/guide-mini-vue.esm.js'
     }
   ],
-  plugins: [esbuild()]
+  plugins: [typescript()]
 }
