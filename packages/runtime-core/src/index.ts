@@ -1,4 +1,4 @@
-export { nextTick } from './shcheduler'
+export { nextTick } from './scheduler'
 export { createRenderer } from './renderer'
 export { renderSlots } from '../helpers/renderSlots'
 export { h } from './h'

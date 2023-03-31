@@ -1,4 +1,4 @@
-import { extend } from "@jerome778/shared"
+import { extend } from '@jerome778/shared'
 
 let activeEffect: any
 let shouldTrack = false

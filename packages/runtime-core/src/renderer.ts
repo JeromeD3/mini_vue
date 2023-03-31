@@ -2,7 +2,7 @@ import { createComponentInstance, setupComponent } from './component'
 import { createAppAPI } from './createApp'
 import { Fragment, Text } from './vnode'
 import { shouldUpdateComponent } from './componentUpdateUtils'
-import { queueJobs } from './shcheduler'
+import { queueJobs } from './scheduler'
 import { EMPTY_OBJ, ShapeFlags } from '@jerome778/shared'
 import { effect } from '@jerome778/reactivity'
 
@@ -432,6 +432,8 @@ export function createRenderer(options) {
     // 为什么这里的effect会被执行?
     // 因为这里对响应式对象进行了get操作，所以会触发effect，所以把这里整个函数都存起来
     // 下一次响应式数据变化了，整个函数重新执行
+    // 组件更新是异步更新，然后nextTick也是一个异步的（Promise），同为微任务，所以nextTick会排在这个update之后
+    // nextTick这样就能获取到最新的数据
     instance.update = effect(
       () => {
         if (!instance.isMounted) {
