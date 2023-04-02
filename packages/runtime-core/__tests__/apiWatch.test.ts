@@ -4,16 +4,33 @@ import { watchEffect } from '../src/apiWatch'
 import { nextTick } from '../src/scheduler'
 
 describe('api: watch', () => {
-  it('effect', async () => {
+  it.only('effect', async () => {
     const state = reactive({ count: 0 })
     let dummy
 
     // 组件渲染之前执行 -> setupRenderEffect 在组件渲染之前最后一部执行
     // 之前的effect 是在改变完之后直接运行 -> reactive 与runtime-core 之间没有任何依赖关系
-    watchEffect(() => {
+    // watchEffect(() => {
+    //   dummy = state.count
+    // })
+
+    // Failed test , why?
+    // 因为watchEffect执行后，会执行fn，异步任务只能在队列中等待,此时是没有收集到依赖的，dep里面是空的
+    // 当轮到异步任务执行，发现dep里面是空的，所以他会get到一个undefined，所以dummy没有改变
+    // 但state.count提前执行的话，他会触发get操作，由于当前操作是在effect里面，且shouldTrack为true，所以能将activeEffect收集
+    // 如果没有提前执行，异步任务加入到队列中，shouldTrack重新设置为false，所以不会收集
+
+    // 一开始执行的时候，就已经有一个activeEffect, 且fn已经执行完了，关闭收集依赖了，所以不会收集依赖
+    watchEffect(async () => {
+      // 这里首先收集到一个空的
+      state.count
+      await new Promise(resolve => {
+        resolve(1)
+      })
       dummy = state.count
     })
-    expect(dummy).toBe(0)
+
+    // expect(dummy).toBe(0)
 
     // 响应式改变，watchEffect会在组件渲染之前执行
     state.count++

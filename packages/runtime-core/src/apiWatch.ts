@@ -22,6 +22,7 @@ export function watchEffect(source) {
     if (cleanup) {
       cleanup()
     }
+    // 如果这里是异步的话，例如返回一个Promise
     source(onCleanup)
   }
   // 控制effect的执行
