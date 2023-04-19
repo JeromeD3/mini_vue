@@ -4,6 +4,13 @@ import { initProps } from './componentProps'
 import { emit } from './componentEmit'
 import { initSlots } from './componentSlots'
 
+export const enum LifecycleHooks {
+  BEFORE_MOUNT = 'bm',
+  MOUNTED = 'm',
+  BEFORE_UPDATE = 'bu',
+  UPDATED = 'u'
+}
+
 /**
  *
  * @param vnode
@@ -22,6 +29,10 @@ export function createComponentInstance(vnode, parent) {
     provides: parent ? parent.provides : {},
     parent,
     isMounted: false,
+    bm: null,
+    m: null,
+    bu: null,
+    u: null,
     subTree: {},
     emit: () => {}
   }
@@ -77,13 +88,13 @@ function finishComponentSetup(instance: any) {
   instance.render = Component.render
 }
 
-let currentInstance = null
+export let currentInstance = null
 
 export function getCurrentInstance() {
   return currentInstance
 }
 
-function setCurrentInstance(instance) {
+export function setCurrentInstance(instance) {
   currentInstance = instance
 }
 

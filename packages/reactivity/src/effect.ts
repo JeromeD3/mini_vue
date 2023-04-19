@@ -3,6 +3,25 @@ import { extend } from '@jerome778/shared'
 let activeEffect: any
 let shouldTrack = false
 
+// 存放修改状态前 shouldTrack 状态
+const trackStack: boolean[] = []
+
+/**
+ * 暂停依赖收集
+ */
+export function pauseTrack() {
+  trackStack.push(shouldTrack)
+  shouldTrack = false
+}
+
+/**
+ * 重置依赖收集
+ */
+export function resetTracking() {
+  const last = trackStack.pop()
+  shouldTrack = last === undefined ? true : last
+}
+
 export class ReactiveEffect {
   private _fn: Function
   deps = []

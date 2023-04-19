@@ -9,6 +9,12 @@ export {
   isProxy
 } from './reactive'
 
-export { effect, stop, ReactiveEffect } from './effect'
+export {
+  effect,
+  stop,
+  ReactiveEffect,
+  pauseTrack,
+  resetTracking
+} from './effect'
 
 export { computed } from './computed'

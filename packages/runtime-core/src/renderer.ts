@@ -3,7 +3,7 @@ import { createAppAPI } from './createApp'
 import { Fragment, Text } from './vnode'
 import { shouldUpdateComponent } from './componentUpdateUtils'
 import { queueJobs } from './scheduler'
-import { EMPTY_OBJ, ShapeFlags } from '@jerome778/shared'
+import { EMPTY_OBJ, ShapeFlags, invokeArrayFns } from '@jerome778/shared'
 import { effect } from '@jerome778/reactivity'
 
 export function createRenderer(options) {
@@ -437,7 +437,13 @@ export function createRenderer(options) {
     instance.update = effect(
       () => {
         if (!instance.isMounted) {
-          const { proxy } = instance
+          //初始化
+          const { proxy, bm, m } = instance
+
+          // beforeMount Hook
+          if (bm) {
+            invokeArrayFns(bm)
+          }
 
           // 在初始化的时候存了旧节点
           //  第二个proxy 指render函数的第一个参数ctx
@@ -452,16 +458,26 @@ export function createRenderer(options) {
           // 所有的element都已经mount之后
           initialVNode.el = subTree.el
 
+          // mounted Hook
+          if (m) {
+            invokeArrayFns(m)
+          }
+
           instance.isMounted = true
         } else {
           // 需要一个vnode更新后的
-          const { vnode, next } = instance
+          const { vnode, next, bu, u, proxy } = instance
           if (next) {
             next.el = vnode.el
             // 更新组件上的props
             updateComponentPreRender(instance, next)
           }
-          const { proxy } = instance
+
+          // beforeUpdate Hook
+          if (bu) {
+            invokeArrayFns(bu)
+          }
+
           //  第二个proxy 指render函数的第一个参数ctx
           const subTree = instance.render.call(proxy, proxy)
           const prevTree = instance.subTree
@@ -469,6 +485,11 @@ export function createRenderer(options) {
           instance.subTree = subTree
 
           patch(prevTree, subTree, container, instance, anchor)
+
+          // updated Hook
+          if (u) {
+            invokeArrayFns(u)
+          }
         }
       },
       {

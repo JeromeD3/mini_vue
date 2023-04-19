@@ -42,3 +42,14 @@ export const pipe = (...fns) => {
     return fns.reduce(callback, param)
   }
 }
+
+/**
+ * 执行函数数组
+ * @param fns
+ * @param arg
+ */
+export const invokeArrayFns = (fns: Function[], arg?: any) => {
+  for (let i = 0; i < fns.length; i++) {
+    fns[i](arg)
+  }
+}

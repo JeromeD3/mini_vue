@@ -7,3 +7,10 @@ export { getCurrentInstance, registerRuntimeCompiler } from './component'
 export { provide, inject } from './apiInject'
 export { toDisplayString } from '@jerome778/shared'
 export * from '@jerome778/reactivity'
+
+export {
+  onBeforeMount,
+  onMounted,
+  onBeforeUpdate,
+  onUpdated
+} from './apiLifecycle'
